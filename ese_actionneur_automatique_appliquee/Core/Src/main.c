@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "SHELL.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,7 +56,17 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int fonction(int argc, char ** argv) {
+	printf("Fonction Test\r\n");
 
+	printf("argc = %d\r\n", argc);
+
+	for (int i = 0 ; i < argc ; i++) {
+		printf("arg numero %d = %s\r\n", i, argv[i]);
+	}
+
+	return 0;
+}
 /* USER CODE END 0 */
 
 /**
@@ -88,7 +99,8 @@ int main(void)
   MX_GPIO_Init();
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("Test\r\n");
+  shell_init();
+  shell_add('f', fonction, "Une fonction inutile");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -156,6 +168,13 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	if(huart->Instance == LPUART1){
+		shell_char_received();
+		HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)&c, 1);
+	}
+}
 
 /* USER CODE END 4 */
 
