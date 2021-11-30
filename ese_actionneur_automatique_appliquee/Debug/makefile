@@ -61,8 +61,8 @@ all: main-build
 main-build: ese_actionneur_automatique_appliquee.elf secondary-outputs
 
 # Tool invocations
-ese_actionneur_automatique_appliquee.elf: $(OBJS) $(USER_OBJS) D:\Git\ folder\ese_actionneur_automatique_appliquee\ese_actionneur_automatique_appliquee\STM32G431RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ese_actionneur_automatique_appliquee.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Git folder\ese_actionneur_automatique_appliquee\ese_actionneur_automatique_appliquee\STM32G431RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ese_actionneur_automatique_appliquee.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+ese_actionneur_automatique_appliquee.elf: $(OBJS) $(USER_OBJS) C:\Git\ Folder\ese_actionneur_automatique_appliquee\ese_actionneur_automatique_appliquee\STM32G431RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "ese_actionneur_automatique_appliquee.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Git Folder\ese_actionneur_automatique_appliquee\ese_actionneur_automatique_appliquee\STM32G431RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ese_actionneur_automatique_appliquee.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
