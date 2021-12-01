@@ -1,6 +1,4 @@
-#include "SHELL.h"
-
-
+#include <shell.h>
 #include "shell.h"
 
 #include <stdio.h>

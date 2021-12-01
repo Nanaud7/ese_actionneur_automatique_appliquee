@@ -5,39 +5,42 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Core/Src/SHELL.c \
-../Core/Src/STEPPER.c \
 ../Core/Src/gpio.c \
 ../Core/Src/main.c \
+../Core/Src/shell.c \
+../Core/Src/stepper.c \
 ../Core/Src/stm32g4xx_hal_msp.c \
 ../Core/Src/stm32g4xx_it.c \
 ../Core/Src/syscalls.c \
 ../Core/Src/sysmem.c \
 ../Core/Src/system_stm32g4xx.c \
+../Core/Src/tim.c \
 ../Core/Src/usart.c 
 
 OBJS += \
-./Core/Src/SHELL.o \
-./Core/Src/STEPPER.o \
 ./Core/Src/gpio.o \
 ./Core/Src/main.o \
+./Core/Src/shell.o \
+./Core/Src/stepper.o \
 ./Core/Src/stm32g4xx_hal_msp.o \
 ./Core/Src/stm32g4xx_it.o \
 ./Core/Src/syscalls.o \
 ./Core/Src/sysmem.o \
 ./Core/Src/system_stm32g4xx.o \
+./Core/Src/tim.o \
 ./Core/Src/usart.o 
 
 C_DEPS += \
-./Core/Src/SHELL.d \
-./Core/Src/STEPPER.d \
 ./Core/Src/gpio.d \
 ./Core/Src/main.d \
+./Core/Src/shell.d \
+./Core/Src/stepper.d \
 ./Core/Src/stm32g4xx_hal_msp.d \
 ./Core/Src/stm32g4xx_it.d \
 ./Core/Src/syscalls.d \
 ./Core/Src/sysmem.d \
 ./Core/Src/system_stm32g4xx.d \
+./Core/Src/tim.d \
 ./Core/Src/usart.d 
 
 

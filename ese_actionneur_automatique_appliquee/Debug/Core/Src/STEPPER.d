@@ -1,1 +1,1 @@
-Core/Src/STEPPER.o: ../Core/Src/STEPPER.c
+Core/Src/stepper.o: ../Core/Src/stepper.c
