@@ -100,11 +100,16 @@ int main(void)
   MX_GPIO_Init();
   MX_LPUART1_UART_Init();
   MX_TIM1_Init();
+  MX_TIM2_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   shell_init();
   shell_add('f', fonction, "Une fonction inutile");
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+
+  HAL_TIM_Base_Start_IT(&htim6);
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -178,6 +183,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if(huart->Instance == LPUART1){
 		shell_char_received();
 		HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)&c, 1);
+	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim->Instance == TIM6){
+		int16_t ticks = TIM2->CNT;
+		TIM2->CNT = 0;
+		printf("ticks = %d\t speed = %0.2f tr/s\r\n",ticks,(float)(ticks*10)/40);
 	}
 }
 
