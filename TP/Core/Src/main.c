@@ -20,11 +20,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usart.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdlib.h>
 #include "SHELL.h"
 /* USER CODE END Includes */
 
@@ -45,7 +47,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint8_t hacheurStart = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,8 +58,9 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 int fonction(int argc, char ** argv) {
-	printf("Fonction Test\r\n");
+	printf("Fonction exemple\r\n");
 
 	printf("argc = %d\r\n", argc);
 
@@ -67,6 +70,44 @@ int fonction(int argc, char ** argv) {
 
 	return 0;
 }
+
+int hacheur(int argc, char ** argv){
+	if(argc == 2){
+		uint8_t cmd = atoi(argv[1]);
+
+		if(cmd == 1){
+			printf("Hacheur active !\r\n");
+			hacheurStart = 1;
+		}
+		else{
+			hacheurStart = 0;
+			printf("Hacheur desactive !\r\n");
+		}
+	}
+
+	return 0;
+}
+
+int speed(int argc, char ** argv){
+	if(argc == 2){
+		float vitesse = atof(argv[1]);
+		printf("vitesse = %f\r\n",vitesse);
+
+		if(vitesse < 0) vitesse = 0;
+		else if(vitesse > 100) vitesse = 100;
+
+		float cmd = 1023 * (vitesse/100);
+		TIM1->CCR1 = (int)cmd;
+		printf("cmd = %d\r\n",(int)cmd);
+
+		float cmdn = 1023 - cmd;
+		TIM1->CCR2 = (int)cmdn;
+		printf("cmdn = %d\r\n",(int)cmdn);
+	}
+
+	return 0;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -98,15 +139,47 @@ int main(void)
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
 	MX_LPUART1_UART_Init();
+	MX_TIM1_Init();
 	/* USER CODE BEGIN 2 */
 	shell_init();
-	shell_add('f', fonction, "Une fonction inutile");
+	shell_add('f', fonction, "Fonction exemple");
+	shell_add('a', hacheur, "Activation hacheur");
+	shell_add('s', speed, "Vitesse");
+
+	TIM1->PSC = 5-1;	// car il compte et decompte
+	TIM1->ARR = 1024-1;
+
+	TIM1->CCR1 = 614;
+	TIM1->CCR2 = 1023-614;
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
+		if (hacheurStart == 1){
+			HAL_GPIO_WritePin(ISO_RESET_GPIO_Port, ISO_RESET_Pin, 1);
+			HAL_Delay(1);
+			HAL_GPIO_WritePin(ISO_RESET_GPIO_Port, ISO_RESET_Pin, 0);
+
+			HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+
+
+			HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+
+
+		}
+		else{
+			HAL_GPIO_WritePin(ISO_RESET_GPIO_Port, ISO_RESET_Pin, 0);
+
+			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
+			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
+		}
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -168,6 +241,19 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if(GPIO_Pin == GPIO_PIN_13){
+		hacheurStart = !hacheurStart;
+
+		if(hacheurStart == 1){
+			printf("Hacheur active !\r\n");
+		}
+		else{
+			printf("Hacheur desactive !\r\n");
+		}
+	}
+}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if(huart->Instance == LPUART1){
