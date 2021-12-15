@@ -1,0 +1,7 @@
+monShell.c:46:5:__io_putchar	16	static
+monShell.c:57:5:uart_write	16	static
+monShell.c:68:5:sh_help	24	static
+monShell.c:79:6:shell_init	16	static
+monShell.c:96:5:shell_add	24	static
+monShell.c:108:6:shell_char_received	8	static
+monShell.c:137:5:shell_exec	64	static
