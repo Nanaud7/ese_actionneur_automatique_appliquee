@@ -90,8 +90,11 @@ void shell_init() {
 }
 
 /**
- *	@brief	Ajouter une commande dans la liste
+ *	@brief	Ajouter une commande dans la liste des commandes
+ *	@param	c
  *	@param
+ *	@param
+ *	@retval	0
  */
 int shell_add(char c, int (* pfunc)(int argc, char ** argv), char * description) {
 	if (shell_func_list_size < SHELL_FUNC_LIST_MAX_SIZE) {
@@ -105,6 +108,9 @@ int shell_add(char c, int (* pfunc)(int argc, char ** argv), char * description)
 	return -1;
 }
 
+/**
+ *	@brief	Traitement d'un caractère reçu
+ */
 void shell_char_received() {
 
 	switch (c) {
@@ -118,8 +124,8 @@ void shell_char_received() {
 		shell_exec(buf[0], buf);
 		break;
 
-		// Delete
 	case '\b':
+		// Delete
 		if (pos > 0) {
 			pos--;
 			uart_write(backspace, 3);
@@ -134,6 +140,12 @@ void shell_char_received() {
 	}
 }
 
+/**
+ *	@brief	Execution d'une commande du shell
+ *	@param	c Caractère à tester
+ *	@param	buf
+ *	@retval
+ */
 int shell_exec(char c, char * buf) {
 	int i;
 
