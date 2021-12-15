@@ -18,7 +18,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <monShell.h>
+#include "myShell.h"
 #include "main.h"
 #include "usart.h"
 #include "tim.h"
@@ -104,12 +104,12 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   shell_init();
-  shell_add('f', fonction, "Une fonction inutile");
+  shell_add("fonction", fonction, "Fonction exemple");
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
-  HAL_TIM_Base_Start_IT(&htim6);
-  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  //HAL_TIM_Base_Start_IT(&htim6);
+  //HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   /* USER CODE END 2 */
 
   /* Infinite loop */

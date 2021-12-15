@@ -8,7 +8,7 @@ C_SRCS += \
 ../Core/Src/STEPPER.c \
 ../Core/Src/gpio.c \
 ../Core/Src/main.c \
-../Core/Src/monShell.c \
+../Core/Src/myShell.c \
 ../Core/Src/stm32g4xx_hal_msp.c \
 ../Core/Src/stm32g4xx_it.c \
 ../Core/Src/syscalls.c \
@@ -21,7 +21,7 @@ OBJS += \
 ./Core/Src/STEPPER.o \
 ./Core/Src/gpio.o \
 ./Core/Src/main.o \
-./Core/Src/monShell.o \
+./Core/Src/myShell.o \
 ./Core/Src/stm32g4xx_hal_msp.o \
 ./Core/Src/stm32g4xx_it.o \
 ./Core/Src/syscalls.o \
@@ -34,7 +34,7 @@ C_DEPS += \
 ./Core/Src/STEPPER.d \
 ./Core/Src/gpio.d \
 ./Core/Src/main.d \
-./Core/Src/monShell.d \
+./Core/Src/myShell.d \
 ./Core/Src/stm32g4xx_hal_msp.d \
 ./Core/Src/stm32g4xx_it.d \
 ./Core/Src/syscalls.d \

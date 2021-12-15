@@ -1,7 +1,7 @@
 "./Core/Src/STEPPER.o"
 "./Core/Src/gpio.o"
 "./Core/Src/main.o"
-"./Core/Src/monShell.o"
+"./Core/Src/myShell.o"
 "./Core/Src/stm32g4xx_hal_msp.o"
 "./Core/Src/stm32g4xx_it.o"
 "./Core/Src/syscalls.o"
