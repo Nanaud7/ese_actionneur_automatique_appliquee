@@ -6,6 +6,8 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Core/Src/SHELL.c \
+../Core/Src/adc.c \
+../Core/Src/dma.c \
 ../Core/Src/gpio.c \
 ../Core/Src/main.c \
 ../Core/Src/stm32g4xx_hal_msp.c \
@@ -18,6 +20,8 @@ C_SRCS += \
 
 OBJS += \
 ./Core/Src/SHELL.o \
+./Core/Src/adc.o \
+./Core/Src/dma.o \
 ./Core/Src/gpio.o \
 ./Core/Src/main.o \
 ./Core/Src/stm32g4xx_hal_msp.o \
@@ -30,6 +34,8 @@ OBJS += \
 
 C_DEPS += \
 ./Core/Src/SHELL.d \
+./Core/Src/adc.d \
+./Core/Src/dma.d \
 ./Core/Src/gpio.d \
 ./Core/Src/main.d \
 ./Core/Src/stm32g4xx_hal_msp.d \

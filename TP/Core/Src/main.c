@@ -19,6 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
 #include "usart.h"
 #include "tim.h"
 #include "gpio.h"
@@ -27,6 +29,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "SHELL.h"
 /* USER CODE END Includes */
 
@@ -41,13 +44,16 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define ENC_TICKS_PER_REV 4000
+#define ENC_FREQ_ECH 50
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 uint8_t hacheurStart = 0;
+int32_t ticks = 0;
+uint32_t value[2];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -140,6 +146,10 @@ int main(void)
 	MX_GPIO_Init();
 	MX_LPUART1_UART_Init();
 	MX_TIM1_Init();
+	MX_TIM2_Init();
+	MX_TIM6_Init();
+	MX_DMA_Init();
+	MX_ADC1_Init();
 	/* USER CODE BEGIN 2 */
 	shell_init();
 	shell_add('f', fonction, "Fonction exemple");
@@ -151,6 +161,12 @@ int main(void)
 
 	TIM1->CCR1 = 614;
 	TIM1->CCR2 = 1023-614;
+
+	HAL_TIM_Base_Start_IT(&htim6);
+	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_1 || TIM_CHANNEL_2);
+
+	//HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
+	HAL_ADC_Start_DMA(&hadc1, value, 2);
 
 	/* USER CODE END 2 */
 
@@ -166,11 +182,8 @@ int main(void)
 			HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
 
-
 			HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
 			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-
-
 		}
 		else{
 			HAL_GPIO_WritePin(ISO_RESET_GPIO_Port, ISO_RESET_Pin, 0);
@@ -180,6 +193,9 @@ int main(void)
 			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
 			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
 		}
+
+		HAL_ADC_Start_DMA(&hadc1, value, 2);
+		HAL_Delay(1000);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -232,8 +248,9 @@ void SystemClock_Config(void)
 	}
 	/** Initializes the peripherals clocks
 	 */
-	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_LPUART1;
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_LPUART1|RCC_PERIPHCLK_ADC12;
 	PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PCLK1;
+	PeriphClkInit.Adc12ClockSelection = RCC_ADC12CLKSOURCE_SYSCLK;
 	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
 	{
 		Error_Handler();
@@ -251,6 +268,34 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 		}
 		else{
 			printf("Hacheur desactive !\r\n");
+		}
+	}
+
+	if(GPIO_Pin == GPIO_PIN_8){
+		/*
+		ticks = TIM2->CNT;
+		TIM2->CNT = 0;
+		if(hacheurStart) printf("ticks/tour = %d\r\n",(int)ticks);
+		 */
+	}
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
+	if(hadc->Instance == ADC1){
+		printf("%d\t%d\r\n",(int)value[0],(int)value[1]);
+	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim->Instance == TIM6){
+		ticks = TIM2->CNT;
+		TIM2->CNT = 0;
+
+		float vit = ((float)ticks * 2 * M_PI * ENC_FREQ_ECH) / (float)ENC_TICKS_PER_REV;
+
+		if(hacheurStart){
+			//printf("ticks = %d\r\n",ticks);
+			//printf("vit = %f rad/s\r\n",vit);
 		}
 	}
 }
