@@ -19,12 +19,17 @@ typedef struct{
 /* Macros --------------------------------------------------------------------*/
 #define SHELL_UART_DEVICE hlpuart1
 #define SHELL_FUNC_LIST_MAX_SIZE 16
+#define SHELL_CMD_MAX_SIZE 16
 #define ARGC_MAX 8
 #define BUFFER_SIZE 40
 /* End of macros -------------------------------------------------------------*/
 
+/* Constants -----------------------------------------------------------------*/
+/* End of constants ----------------------------------------------------------*/
+
 /* Variables -----------------------------------------------------------------*/
-char help[] = "help";
+UART_HandleTypeDef* shell_huart = NULL;
+char prompt[] = "@Nucleo-G431 >> ";
 
 char c = 0;
 uint8_t pos = 0;
@@ -39,9 +44,9 @@ static shell_func_t shell_func_list[SHELL_FUNC_LIST_MAX_SIZE];
 /* Functions -----------------------------------------------------------------*/
 
 /**
- *	@brief	Fonction pour pouvoir utiliser le printf() sur la liaison uart
- *	@param	Caractère à écrire sur la liaison uart
- *	@retval	Caractère écrit sur la liaison uart
+ * Fonction indispensable pour utiliser printf() sur la liaison uart
+ * @param ch Caractère à écrire sur la liaison uart
+ * @return Caractère écrit sur la liaison uart
  */
 int __io_putchar(int ch) {
 	HAL_UART_Transmit(&SHELL_UART_DEVICE, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
@@ -49,10 +54,10 @@ int __io_putchar(int ch) {
 }
 
 /**
- * @brief	Écriture sur la liaison uart
- * @param	s Chaîne de caractères à écrire sur la liaison uart
- * @param	size Longueur de la chaîne de caractère
- * @retval	size
+ * Écriture sur la liaison uart
+ * @param s Chaîne de caractères à écrire sur la liaison uart
+ * @param size Longueur de la chaîne de caractère
+ * @return size
  */
 int uart_write(char *s, uint16_t size) {
 	HAL_UART_Transmit(&SHELL_UART_DEVICE, (uint8_t*)s, size, 0xFFFF);
@@ -68,7 +73,7 @@ int uart_write(char *s, uint16_t size) {
 int sh_help(int argc, char ** argv) {
 	int i;
 	for(i = 0 ; i < shell_func_list_size ; i++) {
-		printf("%s %s\r\n", shell_func_list[i].cmd, shell_func_list[i].description);
+		printf("%s : %s\r\n", shell_func_list[i].cmd, shell_func_list[i].description);
 	}
 	return 0;
 }
@@ -78,13 +83,13 @@ int sh_help(int argc, char ** argv) {
  */
 void shell_init() {
 	printf("\r\n\r\n===== Shell =====\r\n");
-	HAL_UART_Receive_IT(&SHELL_UART_DEVICE, (uint8_t*)&c, 1);
-	//uart_write(prompt,sizeof(prompt));
+	uart_write(prompt,sizeof(prompt));
 
-	shell_add("help", sh_help, help);
+	HAL_UART_Receive_IT(&SHELL_UART_DEVICE, (uint8_t*)&c, 1);
+
+	shell_add("help", sh_help, (char *)"help");
 
 	for (int i = 0 ; i < 3 ; i++) {
-
 		HAL_Delay(200);
 	}
 }
@@ -119,9 +124,10 @@ void shell_char_received() {
 		// Enter
 		printf("\r\n");
 		buf[pos++] = 0;
-		printf(":%s\r\n", buf);
+		//printf(":%s\r\n", buf);
 		pos = 0;
 		shell_exec(buf);
+		uart_write(prompt,sizeof(prompt));
 		break;
 
 	case '\b':
@@ -146,71 +152,38 @@ void shell_char_received() {
  *	@retval
  */
 int shell_exec(char * cmd) {
+	int argc;
+	char * argv[ARGC_MAX];
+	char *p;
 
-	// Initialisation du tableau des paramètres
-	char argv[ARGC_MAX][16];
-	char * p_argv[ARGC_MAX];
+	// Séparation du header et des paramètres
+	char header[SHELL_CMD_MAX_SIZE] = "";
+	int h = 0;
 
+	while(cmd[h] != ' ' && h < SHELL_CMD_MAX_SIZE){
+		header[h] = cmd[h];
+		h++;
+	}
+	header[h] = '\0';
 
-	for(int i = 0; i < ARGC_MAX; i++){
-		for(int j = 0; j < 16; j++){
-			argv[i][j] = 0;
-		}
+	// Recherche de la commande et paramètres
+	for(int i = 0 ; i < shell_func_list_size ; i++) {
+		if (!strcmp(shell_func_list[i].cmd, header)) {
+			argc = 1;
+			argv[0] = cmd;
 
-		if(i == 0){
-			p_argv[i] = argv[0];
-		}
-		else{
-			p_argv[i] = p_argv[i-1] + 16;
+			for(p = cmd ; *p != '\0' && argc < ARGC_MAX ; p++){
+				if(*p == ' ') {
+					*p = '\0';
+					argv[argc++] = p+1;
+				}
+			}
+
+			return shell_func_list[i].func(argc, argv);
 		}
 	}
-
-
-	// Séparation de la commande et des paramètres
-	int tmp_i = 0;
-	int cmd_i = 0;
-	int argc = 0;
-	char tmpbuf[16] = "";
-
-	for(char *p = cmd ; *p != '\0' && argc < ARGC_MAX ; p++){
-		if(*p == ' ') {
-			tmpbuf[tmp_i] = '\0';
-			strcpy(argv[argc],tmpbuf);
-			memset(tmpbuf, 0, strlen(tmpbuf));
-			tmp_i = 0;
-			cmd_i++;
-			argc++;
-		}
-		else{
-			tmpbuf[tmp_i] = cmd[cmd_i];
-			tmp_i++;
-			cmd_i++;
-			printf("tmpbuf = %s\r\n", tmpbuf);
-		}
-	}
-
-	tmpbuf[tmp_i] = '\0';
-	strcpy(argv[argc],tmpbuf);
-
-	// Recherche de la fonction à exécuter
-	printf("Recherche de la fonction a executer\r\n");
-
-	int i = 0;
-	int ret_cmp = 1;
-
-	while(i < shell_func_list_size && ret_cmp != 0){
-		ret_cmp = strcmp(argv[0],shell_func_list[i].cmd);
-		i++;
-	}
-
-	// Execution de la commande
-	if(ret_cmp == 0){
-		return shell_func_list[i].func(argc, p_argv);
-	}
-
-	printf("Commande inconnu\r\n");
+	printf("%s: command not found\r\n", cmd);
 	return -1;
-
 }
 
 /* End of functions ----------------------------------------------------------*/

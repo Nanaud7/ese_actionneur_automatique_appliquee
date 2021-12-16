@@ -1,7 +1,7 @@
-myShell.c:46:5:__io_putchar	16	static
-myShell.c:57:5:uart_write	16	static
-myShell.c:68:5:sh_help	24	static
-myShell.c:79:6:shell_init	16	static
-myShell.c:99:5:shell_add	24	static
-myShell.c:114:6:shell_char_received	8	static
-myShell.c:148:5:shell_exec	224	static
+myShell.c:51:5:__io_putchar	16	static
+myShell.c:62:5:uart_write	16	static
+myShell.c:73:5:sh_help	24	static
+myShell.c:84:6:shell_init	16	static
+myShell.c:104:5:shell_add	24	static
+myShell.c:119:6:shell_char_received	8	static
+myShell.c:154:5:shell_exec	80	static

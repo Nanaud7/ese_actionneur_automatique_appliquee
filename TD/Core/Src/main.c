@@ -58,7 +58,7 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int fonction(int argc, char ** argv) {
-	printf("Fonction Test\r\n");
+	printf("Fonction exemple\r\n");
 
 	printf("argc = %d\r\n", argc);
 
